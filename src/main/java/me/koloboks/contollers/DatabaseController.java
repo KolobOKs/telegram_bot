@@ -1,20 +1,12 @@
 package me.koloboks.contollers;
 
 import me.koloboks.entities.*;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.cfg.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Service;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by Kirill Maloyaroslavtsev on 18.05.16.
@@ -31,6 +23,9 @@ public final class DatabaseController {
     @Autowired
     private GameDao gameDao;
 
+    @Autowired
+    private AttemptDao attemptDao;
+
     public DatabaseController() {
         SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
     }
@@ -45,8 +40,8 @@ public final class DatabaseController {
         user.setStatus(1);
         user.setTelegramId("koloboks");
 
-        Game game1 = new Game(user,1,1,1);
-        Game game2 = new Game(user,2,2,2);
+        Game game1 = new Game(user,1,1,"1234");
+        Game game2 = new Game(user,2,2,"2345");
 
         List<Game> gamesList = new ArrayList<>();
         gamesList.add(game1);
@@ -59,6 +54,10 @@ public final class DatabaseController {
 
         userDao.save(user);
         gameDao.save(gamesList);
+
+        Attempt attempt = new Attempt(game1,"2345","2K 1B");
+
+        attemptDao.save(attempt);
 
         Iterable<User> users=userDao.findAll();
         for (User user1 : users) {

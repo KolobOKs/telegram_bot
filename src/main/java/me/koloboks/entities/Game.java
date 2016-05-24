@@ -1,6 +1,7 @@
 package me.koloboks.entities;
 
 import javax.persistence.*;
+import java.util.List;
 
 /**
  * Created by Kirill Maloyaroslavtsev on 23.05.16.
@@ -23,12 +24,15 @@ public class Game {
     private int attemntCount;
 
     @Column(name="RIGHT_ANSWER")
-    private int rightAnswer;
+    private String rightAnswer;
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "game")
+    private List<Attempt> attempts;
 
     public Game() {
     }
 
-    public Game(User user, int gameType, int attemntCount, int rightAnswer) {
+    public Game(User user, int gameType, int attemntCount, String rightAnswer) {
         this.user = user;
         this.gameType = gameType;
         this.attemntCount = attemntCount;
@@ -67,11 +71,11 @@ public class Game {
         this.attemntCount = attemntCount;
     }
 
-    public int getRightAnswer() {
+    public String getRightAnswer() {
         return rightAnswer;
     }
 
-    public void setRightAnswer(int rightAnswer) {
+    public void setRightAnswer(String rightAnswer) {
         this.rightAnswer = rightAnswer;
     }
 }
