@@ -7,7 +7,7 @@ import java.util.List;
  * Created by Kirill Maloyaroslavtsev on 23.05.16.
  */
 @Entity
-@Table
+@Table(name = "Game")
 public class Game {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -26,7 +26,7 @@ public class Game {
     @Column(name="RIGHT_ANSWER")
     private String rightAnswer;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "game")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "game",cascade= CascadeType.REMOVE)
     private List<Attempt> attempts;
 
     public Game() {
@@ -77,5 +77,13 @@ public class Game {
 
     public void setRightAnswer(String rightAnswer) {
         this.rightAnswer = rightAnswer;
+    }
+
+    public List<Attempt> getAttempts() {
+        return attempts;
+    }
+
+    public void setAttempts(List<Attempt> attempts) {
+        this.attempts = attempts;
     }
 }

@@ -1,18 +1,21 @@
 package me.koloboks.contollers;
 
+import me.koloboks.commons.AttemptInformation;
 import me.koloboks.entities.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
  * Created by Kirill Maloyaroslavtsev on 18.05.16.
  */
 @Component
-public final class DatabaseController {
+public class DatabaseController {
 
     @Autowired
     private PhotoDao photoDao;
@@ -26,53 +29,64 @@ public final class DatabaseController {
     @Autowired
     private AttemptDao attemptDao;
 
+    @Autowired
+    private GameController gameController;
+
     public DatabaseController() {
         SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
     }
 
-    public void TestMethod(){
 
-            Photo  p=photoDao.findOne(new Long(1));
-            Photo p2 = photoDao.findByName ("test");
-            Iterable<Photo> p3 = photoDao.findAll();
+    public User GetUserByTelegramId(String telegramId){
+        return userDao.getUserByTelegramId(telegramId);
+    }
 
-            User user = new User();
-        user.setStatus(1);
-        user.setTelegramId("koloboks");
+    public User createUser(String telegramId){
+        User newUser = new User();
+        newUser.setTelegramId(telegramId);
+        userDao.save(newUser);
+        newUser=userDao.getUserByTelegramId(telegramId);
+        return newUser;
+    }
 
-        Game game1 = new Game(user,1,1,"1234");
-        Game game2 = new Game(user,2,2,"2345");
 
-        List<Game> gamesList = new ArrayList<>();
-        gamesList.add(game1);
-        gamesList.add(game2);
-
-        user.setGames(gamesList);
-//
-//        gameDao.save(game1);
-//        gameDao.save(game2);
-
-        userDao.save(user);
-        gameDao.save(gamesList);
-
-        Attempt attempt = new Attempt(game1,"2345","2K 1B");
-
-        attemptDao.save(attempt);
-
-        Iterable<User> users=userDao.findAll();
-        for (User user1 : users) {
-            System.out.println(user1.getId() + "" + user1.getGames().size());
+    public Game getCurrentGameForUser(String telegramId){
+        User currentUser=userDao.getUserByTelegramId(telegramId);
+        if(currentUser==null){
+            currentUser= createUser(telegramId);
+            userDao.save(currentUser);
         }
 
-        users.getClass();
-//        Configuration configuration = new Configuration();
-//        configuration.configure();
-//        StandardServiceRegistryBuilder ssrb = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties());
-//        SessionFactory sessionFactory = configuration.buildSessionFactory(ssrb.build());
-//        Session session = sessionFactory.openSession();
-//        List<Photo> photoList=(List<Photo>)(session.createQuery("from Photo").list());
-//        session.close();
+        Game currentGame=gameDao.getCurrentGame(currentUser.getId());
+        if(currentGame==null){
 
+            currentGame=new Game(currentUser,1,0, gameController.getRandomGameNumber());
+            gameDao.save(currentGame);
+        }
+        return currentGame;
     }
+
+    public List<Attempt> getAttempts(Game game){ return new ArrayList<Attempt>(Arrays.asList(attemptDao.getAttemptsForGame(game)));}
+
+    public void saveGame(Game gameToSave){
+        gameDao.save(gameToSave);
+    }
+
+    public void addNewAttempt(Game game, Attempt attempt){
+        List<Attempt> attempts=game.getAttempts();
+        if(attempts==null){
+            attempts=new ArrayList<Attempt>();
+        }
+        attempts.add(attempt);
+        game.setAttempts(attempts);
+
+        attemptDao.save(attempt);
+        gameDao.save(game);
+    }
+
+    public void deleteGame(Game game){
+        gameDao.delete(game);
+    }
+
 
 }

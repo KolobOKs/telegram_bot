@@ -24,12 +24,9 @@ public class TelegramBotApplication {
 
 	public static void main(String[] args) throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, InterruptedException {
         ApplicationContext ctx = SpringApplication.run(new Class<?>[] {TelegramBotApplication.class, JpaConfig.class}, args);
-        DatabaseController databaseController = (DatabaseController)ctx.getBean("databaseController");
+        TelegramController telegramController = (TelegramController) ctx.getBean("telegramController");
 
-        TelegramController c = new TelegramController();
-        databaseController.TestMethod();
-
-        c.GetUpdates();
+        telegramController.GetUpdates();
 
 	}
 }
